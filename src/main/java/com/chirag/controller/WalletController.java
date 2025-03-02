@@ -4,6 +4,7 @@ import com.chirag.modal.Order;
 import com.chirag.modal.User;
 import com.chirag.modal.Wallet;
 import com.chirag.modal.WalletTransaction;
+import com.chirag.service.OrderService;
 import com.chirag.service.UserService;
 import com.chirag.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class WalletController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private OrderService orderService;
 
     @GetMapping("/api/wallet")
     public ResponseEntity<Wallet> getUserWallet(@RequestHeader("Authorization") String jwt) throws Exception {
