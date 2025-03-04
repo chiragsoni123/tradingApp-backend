@@ -28,6 +28,29 @@ public class OrderController {
     @Autowired
     private CoinService coinService;
 
+    public OrderService getOrderService() {
+        return orderService;
+    }
+
+    public void setOrderService(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    public UserService getUserService() {
+        return userService;
+    }
+
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+
+    public CoinService getCoinService() {
+        return coinService;
+    }
+
+    public void setCoinService(CoinService coinService) {
+        this.coinService = coinService;
+    }
 //    @Autowired
 //    private WalletTransactionService walletTransactionService;
 

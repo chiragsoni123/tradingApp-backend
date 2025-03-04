@@ -6,10 +6,12 @@ import com.chirag.modal.User;
 import com.chirag.modal.Wallet;
 import com.chirag.repository.WalletRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
+@Service
 public class WalletServiceImpl implements WalletService{
 
     @Autowired

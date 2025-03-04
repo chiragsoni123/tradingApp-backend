@@ -1,10 +1,8 @@
 package com.chirag.controller;
 
-import com.chirag.modal.Order;
-import com.chirag.modal.User;
-import com.chirag.modal.Wallet;
-import com.chirag.modal.WalletTransaction;
+import com.chirag.modal.*;
 import com.chirag.service.OrderService;
+import com.chirag.service.PaymentService;
 import com.chirag.service.UserService;
 import com.chirag.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +22,9 @@ public class WalletController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private PaymentService paymentService;
 
     @GetMapping("/api/wallet")
     public ResponseEntity<Wallet> getUserWallet(@RequestHeader("Authorization") String jwt) throws Exception {
@@ -57,6 +58,28 @@ public class WalletController {
         Order order = orderService.getOrderById(orderId);
 
         Wallet wallet = walletService.payOrderPayment(order, user);
+
+
+        return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
+    }
+
+    @PutMapping("/api/wallet/deposit")
+    public ResponseEntity<Wallet> addBalanceToWallet(@RequestHeader("Authorization") String jwt,
+                                                  @RequestParam(name = "payment_id") String paymentId,
+                                                   @RequestParam(name = "order_id") Long orderId
+    ) throws Exception{
+        User user = userService.findUserByJwt(jwt);
+
+
+        Wallet wallet = walletService.getUserWallet(user);
+
+        PaymentOrder order = paymentService.getPaymentOrderById(orderId);
+
+        Boolean status = paymentService.proceedPaymentOrder(order, paymentId);
+
+        if (status){
+            wallet = walletService.addBalance(wallet, order.getAmount());
+        }
 
 
         return new ResponseEntity<>(wallet, HttpStatus.ACCEPTED);
