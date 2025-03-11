@@ -51,7 +51,7 @@ public class WatchListController {
         return ResponseEntity.ok(watchList);
     }
 
-    @PostMapping("/add/coin/{coinId}")
+    @PatchMapping("/add/coin/{coinId}")
     public ResponseEntity<Coin> addItemToWatchlist(
             @RequestHeader("Authorization") String jwt,
             @PathVariable String coinId

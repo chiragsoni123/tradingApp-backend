@@ -74,6 +74,17 @@ public class WithdrawalController {
         return new ResponseEntity<>(withdrawal, HttpStatus.OK);
     }
 
+    @GetMapping("/api/withdrawal")
+    public ResponseEntity<List<Withdrawal>> getWithdrawalHistory(
+            @RequestHeader("Authorization") String jwt
+    ) throws Exception{
+        User user = userService.findUserByJwt(jwt);
+
+        List<Withdrawal> withdrawals = withdrawalService.getUserWithdrawalHistory(user);
+
+        return new ResponseEntity<>(withdrawals, HttpStatus.OK);
+    }
+
     @GetMapping("/api/admin/withdrawal")
     public ResponseEntity<List<Withdrawal>> getAllWithdrawalRequest(
             @RequestHeader("Authorization") String jwt

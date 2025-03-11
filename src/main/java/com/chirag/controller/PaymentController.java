@@ -23,7 +23,7 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
-    @PostMapping("/api/payment/{paymentMethod}/amount/{amount}")
+    @PostMapping("/payment/{paymentMethod}/amount/{amount}")
     public ResponseEntity<PaymentResponse> paymentHandler(
             @PathVariable PaymentMethod paymentMethod,
             @PathVariable Long amount,
@@ -37,7 +37,7 @@ public class PaymentController {
         PaymentOrder order = paymentService.createOrder(user, amount, paymentMethod);
 
         if (paymentMethod.equals(PaymentMethod.RAZORPAY)){
-            paymentResponse= paymentService.createRazorpayPaymentLink(user, amount);
+            paymentResponse= paymentService.createRazorpayPaymentLink(user, amount,order.getId());
         }else {
             paymentResponse = paymentService.createStripePaymentLink(user, amount, order.getId());
         }

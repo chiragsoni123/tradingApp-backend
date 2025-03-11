@@ -8,6 +8,7 @@ import com.chirag.response.AuthResponse;
 import com.chirag.service.CustomUserDetailsService;
 import com.chirag.service.EmailService;
 import com.chirag.service.TwoFactorOtpService;
+import com.chirag.service.WatchListService;
 import com.chirag.utils.OtpUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -65,6 +66,9 @@ public class AuthController {
     }
 
     @Autowired
+    private WatchListService watchListService;
+
+    @Autowired
     private EmailService emailService;
 
 
@@ -85,6 +89,8 @@ public class AuthController {
         newUser.setFullName(user.getFullName());
 
         User savedUser = userRepository.save(newUser);
+
+        watchListService.createWatchList(savedUser);
 
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 user.getEmail(),
