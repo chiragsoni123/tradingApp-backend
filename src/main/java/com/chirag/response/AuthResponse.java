@@ -8,7 +8,7 @@ public class AuthResponse {
 
     private String message;
 
-    private boolean isTwoFactorAuthEnabled;
+    private boolean isTwoFactorAuthEnabled=false;
 
     private String session;
 
