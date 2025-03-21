@@ -15,7 +15,7 @@ public class PaymentOrder {
 
     private Long amount;
 
-    private PaymentOrderStatus status;
+    private PaymentOrderStatus status = PaymentOrderStatus.PENDING;
 
     private PaymentMethod paymentMethod;
 

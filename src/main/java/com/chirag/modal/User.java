@@ -1,6 +1,7 @@
 package com.chirag.modal;
 
 import com.chirag.domain.USER_ROLE;
+import com.chirag.domain.UserStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -64,11 +65,19 @@ public class User {
 
     private String email;
 
+    private String mobile;
+
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
+
+    private UserStatus status = UserStatus.PENDING;
+
+    private boolean isVerified = false;
 
     @Embedded
     private TwoFactorAuth twoFactorAuth = new TwoFactorAuth();
 
-    private USER_ROLE role = USER_ROLE.ROLE_CUSTOMER;
+    private String picture;
+
+    private USER_ROLE role = USER_ROLE.ROLE_USER;
 }

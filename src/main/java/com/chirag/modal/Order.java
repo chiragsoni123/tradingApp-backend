@@ -3,13 +3,17 @@ package com.chirag.modal;
 import com.chirag.domain.OrderStatus;
 import com.chirag.domain.OrderType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "orders")
 public class Order {
 
@@ -20,16 +24,19 @@ public class Order {
     @ManyToOne
     private User user;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderType orderType;
 
     @Column(nullable = false)
     private BigDecimal price;
 
+    @Column(nullable = false)
     private LocalDateTime timestamp= LocalDateTime.now();
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private OrderStatus status;
+    private OrderStatus status = OrderStatus.PENDING;
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private OrderItem orderItem;
