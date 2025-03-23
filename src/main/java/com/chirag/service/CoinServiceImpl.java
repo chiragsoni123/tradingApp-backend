@@ -3,10 +3,12 @@ package com.chirag.service;
 import com.chirag.modal.Coin;
 import com.chirag.repository.CoinRepository;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -28,6 +30,9 @@ public class CoinServiceImpl implements CoinService{
     @Autowired
     private ObjectMapper objectMapper;
 
+//    @Value("${coingecko.api.key}")
+//    private String API_KEY;
+
 
     @Override
     public List<Coin> getCoinList(int page) throws Exception {
@@ -37,16 +42,18 @@ public class CoinServiceImpl implements CoinService{
 
         try{
             HttpHeaders headers = new HttpHeaders();
+//            headers.set("x-cg-demo-api-key", API_KEY);
 
-            HttpEntity<String> entity = new HttpEntity<String>("parameter",headers);
+            HttpEntity<String> entity = new HttpEntity<String>("parameters",headers);
 
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
             List<Coin> coinList = objectMapper.readValue(response.getBody(),
                     new TypeReference<List<Coin>>() {});
             return coinList;
-        }catch (HttpClientErrorException | HttpServerErrorException e){
-            throw new Exception(e.getMessage());
+        }catch (HttpClientErrorException | HttpServerErrorException | JsonProcessingException e){
+            System.out.println("Error: "+e);
+            throw new Exception("Please wait for time because you are using free plan");
         }
     }
 
@@ -58,6 +65,7 @@ public class CoinServiceImpl implements CoinService{
 
         try{
             HttpHeaders headers = new HttpHeaders();
+//            headers.set("x-cg-demo-api-key", API_KEY);
 
             HttpEntity<String> entity = new HttpEntity<String>("parameter",headers);
 
@@ -65,7 +73,20 @@ public class CoinServiceImpl implements CoinService{
 
             return response.getBody();
         }catch (HttpClientErrorException | HttpServerErrorException e){
-            throw new Exception(e.getMessage());
+            System.out.println("Error: "+e);
+            throw new Exception("you are using free plan");
+        }
+    }
+
+    private double convertToDouble(Object value){
+        if (value instanceof  Integer){
+            return ((Integer) value).doubleValue();
+        } else if (value instanceof Long){
+            return ((Long) value).doubleValue();
+        } else if (value instanceof Double){
+            return (Double) value;
+        } else {
+            throw new IllegalArgumentException("Unsupported data type: "+value.getClass().getName());
         }
     }
 
@@ -83,6 +104,9 @@ public class CoinServiceImpl implements CoinService{
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
             JsonNode jsonNode =objectMapper.readTree(response.getBody());
+
+            jsonNode.get("image").get("large");
+            System.out.println(jsonNode.get("image").get("large"));
 
             Coin coin=new Coin();
             coin.setId(jsonNode.get("id").asText());
@@ -103,14 +127,14 @@ public class CoinServiceImpl implements CoinService{
 
             coin.setMarketCapChange24h(marketData.get("market_cap_change_24h").asLong());
 
-            coin.setMarketCapChangePercentage24h(marketData.get("market_cap_change_percentage_24h").asLong());
+            coin.setMarketCapChangePercentage24h(marketData.get("market_cap_change_percentage_24h").asDouble());
 
+            coin.setCirculatingSupply(marketData.get("circulating_supply").asLong());
             coin.setTotalSupply(marketData.get("total_supply").asLong());
             coinRepository.save(coin);
 
             return response.getBody();
         }catch (HttpClientErrorException | HttpServerErrorException e){
-            System.out.println("Error -----"+e.getMessage());
             throw new Exception(e.getMessage());
         }
     }
@@ -118,7 +142,7 @@ public class CoinServiceImpl implements CoinService{
     @Override
     public Coin findById(String coinId) throws Exception {
         Optional<Coin> optionalCoin = coinRepository.findById(coinId);
-        if(optionalCoin.isEmpty())throw new Exception("Coin not found");
+        if(optionalCoin.isEmpty())throw new Exception("Coin not found or invalid coin id");
         return optionalCoin.get();
     }
 
@@ -150,7 +174,7 @@ public class CoinServiceImpl implements CoinService{
         try{
             HttpHeaders headers = new HttpHeaders();
 
-            HttpEntity<String> entity = new HttpEntity<String>("parameter",headers);
+            HttpEntity<String> entity = new HttpEntity<String>("parameters",headers);
 
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 

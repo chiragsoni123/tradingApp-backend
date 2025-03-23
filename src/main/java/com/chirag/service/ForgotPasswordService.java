@@ -13,4 +13,6 @@ public interface ForgotPasswordService {
     ForgotPasswordToken findByUser(Long userId);
 
     void deleteToken(ForgotPasswordToken token);
+
+    boolean verifyToken(ForgotPasswordToken token, String otp);
 }

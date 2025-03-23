@@ -14,7 +14,9 @@ public interface OrderService {
 
     Order getOrderById(Long orderId) throws Exception;
 
-    List<Order> getAllOrdersOfUser(Long userId, OrderType orderType, String assetSymbol);
+    List<Order> getAllOrdersOfUser(Long userId, String orderType, String assetSymbol);
+
+    void cancelOrder(Long orderId) throws Exception;
 
     Order processOrder(Coin coin, double quantity, OrderType orderType, User user) throws Exception;
 

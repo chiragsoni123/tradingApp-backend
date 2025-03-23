@@ -43,4 +43,9 @@ public class ForgotPasswordImpl implements ForgotPasswordService{
     public void deleteToken(ForgotPasswordToken token) {
         forgotPasswordRepository.delete(token);
     }
+
+    @Override
+    public boolean verifyToken(ForgotPasswordToken token, String otp) {
+        return token.getOtp().equals(otp);
+    }
 }

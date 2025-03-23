@@ -19,11 +19,15 @@ public class CustomUserDetailsService  implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
 
+    public CustomUserDetailsService(UserRepository userRepository){
+        this.userRepository= userRepository;
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(username);
         if(user == null){
-            throw new UsernameNotFoundException(username);
+            throw new UsernameNotFoundException("user not found with email - "+username);
         }
 
         List<GrantedAuthority> authorityList = new ArrayList<>();

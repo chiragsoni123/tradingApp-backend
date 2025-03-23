@@ -28,12 +28,12 @@ public class AssetServiceImpl implements AssetService{
     @Override
     public Asset getAssetById(Long asseId) throws Exception {
         return assetRepository.findById(asseId)
-                .orElseThrow(()-> new Exception("Asset not found"));
+                .orElseThrow(()-> new IllegalArgumentException("Asset not found"));
     }
 
     @Override
     public Asset getAssetByUserIdAndId(Long userId, Long assetId) {
-        return null;
+        return assetRepository.findByIdAndUserId(assetId, userId);
     }
 
     @Override
@@ -45,6 +45,9 @@ public class AssetServiceImpl implements AssetService{
     public Asset updateAsset(Long assetId, double quantity) throws Exception {
 
         Asset oldAsset = getAssetById(assetId);
+        if(oldAsset==null){
+            throw new Exception("Asset not found...");
+        }
         oldAsset.setQuantity(quantity + oldAsset.getQuantity());
 
         return assetRepository.save(oldAsset);

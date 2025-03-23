@@ -7,11 +7,12 @@ import com.chirag.repository.OrderItemRepository;
 import com.chirag.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import jakarta.transaction.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService{
@@ -29,6 +30,7 @@ public class OrderServiceImpl implements OrderService{
     private AssetService assetService;
 
     @Override
+    @Transactional
     public Order createOrder(User user, OrderItem orderItem, OrderType orderType) {
         double price = orderItem.getCoin().getCurrentPrice()*orderItem.getQuantity();
 
@@ -51,8 +53,36 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
-    public List<Order> getAllOrdersOfUser(Long userId, OrderType orderType, String assetSymbol) {
-        return orderRepository.findByUserId(userId);
+    public List<Order> getAllOrdersOfUser(Long userId, String orderType, String assetSymbol) {
+        List<Order> allUserOrder = orderRepository.findByUserId(userId);
+
+        if (orderType != null && !orderType.isEmpty()){
+            OrderType type = OrderType.valueOf(orderType.toUpperCase());
+            allUserOrder = allUserOrder.stream()
+                    .filter(order -> order.getOrderType() == type)
+                    .collect(Collectors.toList());
+        }
+
+        if (assetSymbol != null && !assetSymbol.isEmpty()){
+            allUserOrder = allUserOrder.stream()
+                    .filter(order -> order.getOrderItem().getCoin().getSymbol().equals(assetSymbol))
+                    .collect(Collectors.toList());
+        }
+
+        return allUserOrder;
+    }
+
+    @Override
+    @Transactional
+    public void cancelOrder(Long orderId) throws Exception {
+        Order order = getOrderById(orderId);
+
+        if (order.getStatus() == OrderStatus.PENDING){
+            order.setStatus(OrderStatus.CANCELLED);
+            orderRepository.save(order);
+        }else {
+            throw new IllegalArgumentException("Cannot cancel order, it is already processed or cancelled");
+        }
     }
 
     private OrderItem createOrderItem(Coin coin, double quantity, double buyPrice, double sellPrice){
@@ -60,6 +90,7 @@ public class OrderServiceImpl implements OrderService{
         OrderItem orderItem = new OrderItem();
         orderItem.setCoin(coin);
         orderItem.setQuantity(quantity);
+        orderItem.setBuyPrice(coin.getCurrentPrice());
         orderItem.setBuyPrice(buyPrice);
         orderItem.setSellPrice(sellPrice);
 
@@ -131,9 +162,10 @@ public class OrderServiceImpl implements OrderService{
                     assetService.deleteAsset(updatedAsset.getId());
                 }
                 return savedOrder;
+            }else {
+                orderRepository.delete(order);
+                throw new Exception("Insufficient Quantity to sell");
             }
-
-            throw new Exception("Insufficient Quantity to sell");
         }
 
         throw new Exception("Asset not found");
