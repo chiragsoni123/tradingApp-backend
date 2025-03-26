@@ -26,8 +26,20 @@ public class VerificationCodeServiceImpl implements VerificationCodeService{
         return verificationCodeRepository.save(verificationCode1);
     }
 
+
     @Override
-    public VerificationCode getVerificationCodeById(Long id) throws Exception {
+    public VerificationCode getVerificationCodeByUser(User userId) {
+
+        return verificationCodeRepository.findByUserId(userId.getId());
+    }
+
+    @Override
+    public Boolean verifyOtp(String otp, VerificationCode verificationCode) {
+        return otp.equals(verificationCode.getOtp());
+    }
+
+    @Override
+    public VerificationCode findVerificationCodeById(Long id) throws Exception {
         Optional<VerificationCode> verificationCode = verificationCodeRepository.findById(id);
         if(verificationCode.isPresent()){
             return verificationCode.get();
@@ -35,10 +47,6 @@ public class VerificationCodeServiceImpl implements VerificationCodeService{
         throw new Exception("Verification Code not found");
     }
 
-    @Override
-    public VerificationCode getVerificationCodeByUser(Long userId) {
-        return verificationCodeRepository.findByUserId(userId);
-    }
 
     @Override
     public void deleteVerificationCodeById(VerificationCode verificationCode) {

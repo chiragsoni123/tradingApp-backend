@@ -8,9 +8,11 @@ public interface VerificationCodeService {
 
     VerificationCode sendVerificationCode(User user, VerificationType verificationType);
 
-    VerificationCode getVerificationCodeById(Long id) throws Exception;
+    VerificationCode findVerificationCodeById(Long id) throws Exception;
 
-    VerificationCode getVerificationCodeByUser(Long userId);
+    VerificationCode getVerificationCodeByUser(User userId);
+
+    Boolean verifyOtp(String otp, VerificationCode verificationCode);
 
     void deleteVerificationCodeById(VerificationCode verificationCode);
 }

@@ -23,6 +23,7 @@ public class WithdrawalServiceImpl implements WithdrawalService{
         Withdrawal withdrawal = new Withdrawal();
         withdrawal.setAmount(amount);
         withdrawal.setUser(user);
+        withdrawal.setDate(LocalDateTime.now());
         withdrawal.setStatus(WithdrawalStatus.PENDING);
         return withdrawalRepository.save(withdrawal);
     }
@@ -32,14 +33,14 @@ public class WithdrawalServiceImpl implements WithdrawalService{
         Optional<Withdrawal> withdrawal = withdrawalRepository.findById(withdrawalId);
 
         if(withdrawal.isEmpty()){
-            throw new Exception("Withdrawal not found");
+            throw new Exception("Withdrawal id is wrong...");
         }
         Withdrawal withdrawal1 = withdrawal.get();
         withdrawal1.setDate(LocalDateTime.now());
         if(accept){
             withdrawal1.setStatus(WithdrawalStatus.SUCCESS);
         }else{
-            withdrawal1.setStatus(WithdrawalStatus.PENDING);
+            withdrawal1.setStatus(WithdrawalStatus.DECLINE);
         }
         return withdrawalRepository.save(withdrawal1);
     }

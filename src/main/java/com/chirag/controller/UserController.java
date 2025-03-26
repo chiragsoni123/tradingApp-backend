@@ -82,7 +82,7 @@ public class UserController {
 
         User user = userService.findUserByJwt(jwt);
 
-        VerificationCode verificationCode = verificationCodeService.getVerificationCodeByUser(user.getId());
+        VerificationCode verificationCode = verificationCodeService.getVerificationCodeByUser(user);
 
         if(verificationCode== null){
             verificationCode=verificationCodeService.sendVerificationCode(user, verificationType);
@@ -98,7 +98,7 @@ public class UserController {
     public ResponseEntity<User> enableTwoFactorAuthentication( @PathVariable String otp,@RequestHeader("Authorization") String jwt) throws Exception {
         User user = userService.findUserByJwt(jwt);
 
-        VerificationCode verificationCode = verificationCodeService.getVerificationCodeByUser(user.getId());
+        VerificationCode verificationCode = verificationCodeService.getVerificationCodeByUser(user);
 
         String sendTo = verificationCode.getVerificationType().equals(VerificationType.EMAIL)? verificationCode.getEmail():verificationCode.getMobile();
 

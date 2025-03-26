@@ -2,10 +2,12 @@ package com.chirag.service;
 
 import com.chirag.config.JwtProvider;
 import com.chirag.domain.VerificationType;
+import com.chirag.exception.UserException;
 import com.chirag.modal.TwoFactorAuth;
 import com.chirag.modal.User;
 import com.chirag.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
@@ -16,12 +18,15 @@ public class UserServiceImpl implements UserService{
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
-    public User findUserByJwt(String jwt) throws Exception {
+    public User findUserByJwt(String jwt) throws UserException {
         String email = JwtProvider.getEmailFromToken(jwt);
         User user = userRepository.findByEmail(email);
         if(user == null){
-            throw new Exception("User not found");
+            throw new UserException("User not exist with email "+email);
         }
         return user;
     }
@@ -35,21 +40,27 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public User findUserByEmail(String email) throws Exception {
+    public User findUserByEmail(String email) throws UserException {
         User user = userRepository.findByEmail(email);
         if(user == null){
-            throw new Exception("User not found");
+            throw new UserException("User not found with username "+ email);
         }
         return user;
     }
 
     @Override
-    public User findUserById(Long userId) throws Exception {
+    public User findUserById(Long userId) throws UserException {
         Optional<User> user = userRepository.findById(userId);
         if(user.isEmpty()){
-            throw new Exception("User not found");
+            throw new UserException("User not found with id "+userId);
         }
         return user.get();
+    }
+
+    @Override
+    public User verifyUser(User user) {
+        user.setVerified(true);
+        return userRepository.save(user);
     }
 
     @Override
@@ -68,5 +79,10 @@ public class UserServiceImpl implements UserService{
     public User updatePassword(User user, String newPassword) {
         user.setPassword(newPassword);
         return userRepository.save(user);
+    }
+
+    @Override
+    public void sendUpdatedPasswordOtp(String email, String otp) {
+
     }
 }
