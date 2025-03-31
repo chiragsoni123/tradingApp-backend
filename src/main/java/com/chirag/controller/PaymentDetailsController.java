@@ -1,5 +1,6 @@
 package com.chirag.controller;
 
+import com.chirag.exception.UserException;
 import com.chirag.modal.PaymentDetails;
 import com.chirag.modal.User;
 import com.chirag.service.PaymentDetailsService;
@@ -23,7 +24,7 @@ public class PaymentDetailsController {
     public ResponseEntity<PaymentDetails> addPaymentDetails(
             @RequestBody PaymentDetails paymentDetailsRequest,
             @RequestHeader("Authorization") String jwt
-    ) throws Exception{
+    ) throws UserException{
 
         User user = userService.findUserByJwt(jwt);
 
@@ -42,7 +43,7 @@ public class PaymentDetailsController {
     @GetMapping("/payment-details")
     public ResponseEntity<PaymentDetails> getUsersPaymentDetails(
             @RequestHeader("Authorization") String jwt
-    )throws Exception{
+    )throws UserException {
 
         User user = userService. findUserByJwt(jwt);
 

@@ -8,6 +8,7 @@ import com.chirag.request.CreateOrderRequest;
 import com.chirag.service.CoinService;
 import com.chirag.service.OrderService;
 import com.chirag.service.UserService;
+import com.chirag.service.WalletTransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,31 +29,14 @@ public class OrderController {
     @Autowired
     private CoinService coinService;
 
-    public OrderService getOrderService() {
-        return orderService;
-    }
+    @Autowired
+    private WalletTransactionService walletTransactionService;
 
-    public void setOrderService(OrderService orderService) {
+    @Autowired
+    public OrderController(OrderService orderService, UserService userService){
         this.orderService = orderService;
-    }
-
-    public UserService getUserService() {
-        return userService;
-    }
-
-    public void setUserService(UserService userService) {
         this.userService = userService;
     }
-
-    public CoinService getCoinService() {
-        return coinService;
-    }
-
-    public void setCoinService(CoinService coinService) {
-        this.coinService = coinService;
-    }
-//    @Autowired
-//    private WalletTransactionService walletTransactionService;
 
     @PostMapping("/pay")
     public ResponseEntity<Order> payOrderPayment(
@@ -74,6 +58,9 @@ public class OrderController {
             @PathVariable Long orderId
     ) throws Exception{
 
+        if (jwtToken == null){
+            throw new Exception("Token missing...");
+        }
 
         User user = userService.findUserByJwt(jwtToken);
 
@@ -81,7 +68,7 @@ public class OrderController {
         if(order.getUser().getId().equals(user.getId())){
             return ResponseEntity.ok(order);
         }else{
-            throw new Exception("You don't have access");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 

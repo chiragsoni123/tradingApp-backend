@@ -34,15 +34,15 @@ public class WatchListController {
         return ResponseEntity.ok(watchList);
     }
 
-//    @PostMapping("/create")
-//    public ResponseEntity<WatchList> createWatchlist(
-//            @RequestHeader("Authorization") String jwt
-//    ) throws Exception{
-//
-//        User user = userService.findUserByJwt(jwt);
-//        WatchList createdWatchlist = watchListService.createWatchList(user);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(createdWatchlist);
-//    }
+    @PostMapping("/create")
+    public ResponseEntity<WatchList> createWatchlist(
+            @RequestHeader("Authorization") String jwt
+    ) throws Exception{
+
+        User user = userService.findUserByJwt(jwt);
+        WatchList createdWatchlist = watchListService.createWatchList(user);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdWatchlist);
+    }
 
     @GetMapping("/{watchlistId}")
     public ResponseEntity<WatchList> getWatchlistById( @PathVariable Long watchlistId) throws Exception{

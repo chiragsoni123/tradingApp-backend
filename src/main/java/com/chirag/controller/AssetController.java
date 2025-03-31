@@ -14,11 +14,15 @@ import java.util.List;
 @RequestMapping("/api/asset")
 public class AssetController {
 
-    @Autowired
-    private AssetService assetService;
+    private final AssetService assetService;
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    public AssetController(AssetService assetService) {
+        this.assetService = assetService;
+    }
 
     @GetMapping("/{assetId}")
     public ResponseEntity<Asset> getAssetById(@PathVariable Long assetId) throws Exception{

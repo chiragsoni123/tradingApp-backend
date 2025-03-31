@@ -7,6 +7,7 @@ import com.chirag.modal.WalletTransaction;
 import com.chirag.modal.Withdrawal;
 import com.chirag.service.UserService;
 import com.chirag.service.WalletService;
+import com.chirag.service.WalletTransactionService;
 import com.chirag.service.WithdrawalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,8 +29,8 @@ public class WithdrawalController {
     @Autowired
     private UserService userService;
 
-//    @Autowired
-//    private WalletTransactionService walletTransactionService;
+    @Autowired
+    private WalletTransactionService walletTransactionService;
 
     @PostMapping("/api/withdrawal/{amount}")
     public ResponseEntity<?> withdrawalRequest(
@@ -44,12 +45,12 @@ public class WithdrawalController {
 
         walletService.addBalance(userWallet, -withdrawal.getAmount());
 
-//        WalletTransaction walletTransaction = walletTransactionService.createTransaction(
-//                userWallet,
-//                WalletTransactionType.WITHDRAWAL, null,
-//                "Bank account withdrawal",
-//                withdrawal.getAmount()
-//        );
+        WalletTransaction walletTransaction = walletTransactionService.createTransaction(
+                userWallet,
+                WalletTransactionType.WITHDRAWAL, null,
+                "Bank account withdrawal",
+                withdrawal.getAmount()
+        );
 
         return new ResponseEntity<>(withdrawal, HttpStatus.OK);
     }

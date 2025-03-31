@@ -1,5 +1,6 @@
 package com.chirag.controller;
 
+import com.chirag.exception.UserException;
 import com.chirag.request.ForgotPasswordTokenRequest;
 import com.chirag.domain.VerificationType;
 import com.chirag.modal.ForgotPasswordToken;
@@ -30,48 +31,38 @@ public class UserController {
 
     @Autowired
     private EmailService emailService;
+
     private String jwt;
 
     @Autowired
     private ForgotPasswordService forgotPasswordService;
 
-    public UserService getUserService() {
-        return userService;
-    }
-
-    public void setUserService(UserService userService) {
-        this.userService = userService;
-    }
-
-    public VerificationCodeService getVerificationCodeService() {
-        return verificationCodeService;
-    }
-
-    public void setVerificationCodeService(VerificationCodeService verificationCodeService) {
-        this.verificationCodeService = verificationCodeService;
-    }
-
-    public EmailService getEmailService() {
-        return emailService;
-    }
-
-    public void setEmailService(EmailService emailService) {
-        this.emailService = emailService;
-    }
-
-    public String getJwt() {
-        return jwt;
-    }
-
-    public void setJwt(String jwt) {
-        this.jwt = jwt;
-    }
 
     @GetMapping("/api/users/profile")
-    public ResponseEntity<User> getUserProfile(@RequestHeader("Authorization") String jwt) throws Exception {
+    public ResponseEntity<User> getUserProfileHandler(@RequestHeader("Authorization") String jwt) throws UserException {
         User user = userService.findUserByJwt(jwt);
 
-        return new ResponseEntity<User>(user, HttpStatus.OK);
+        return new ResponseEntity<User>(user, HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/api/users/{userId}")
+    public ResponseEntity<User> findUserById(
+            @PathVariable Long userId,
+            @RequestHeader("Authorization") String jwt
+    ) throws Exception {
+        User user= userService.findUserById(userId);
+        user.setPassword(null);
+
+        return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping("/api/users/email/{email}")
+    public ResponseEntity<User> findUserByEmail(
+            @PathVariable String email,
+            @RequestHeader("Authorization") String jwt
+    ) throws Exception {
+        User user = userService.findUserByEmail(email);
+        return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/api/users/verification/{verificationType}/send-otp")
@@ -102,7 +93,7 @@ public class UserController {
 
         String sendTo = verificationCode.getVerificationType().equals(VerificationType.EMAIL)? verificationCode.getEmail():verificationCode.getMobile();
 
-        boolean isVerified = verificationCode.getOtp().equals(otp);
+        boolean isVerified = verificationCodeService.verifyOtp(otp, verificationCode);
 
         if(isVerified){
             User updatedUser = userService.enableTwoFactorAuthentication(verificationCode.getVerificationType(), sendTo, user);
@@ -113,7 +104,7 @@ public class UserController {
     }
 
     @PostMapping("/auth/users/reset-password/send-otp")
-    public ResponseEntity<AuthResponse> sendForgotPasswordOtp(
+    public ResponseEntity<AuthResponse> sendUpdatePasswordOtp(
 
             @RequestBody ForgotPasswordTokenRequest req) throws Exception {
 
@@ -141,19 +132,39 @@ public class UserController {
 
     @PatchMapping("/auth/users/reset-password/verify-otp")
     public ResponseEntity<ApiResponse> resetPassword( @RequestParam String id ,
-                                               @RequestBody ResetPasswordRequest req,
-                                               @RequestHeader("Authorization") String jwt) throws Exception {
+                                               @RequestBody ResetPasswordRequest req
+                                               ) throws Exception {
         ForgotPasswordToken forgotPasswordToken = forgotPasswordService.findById(id);
 
-        boolean isVerified = forgotPasswordToken.getOtp().equals(req.getOtp());
+        boolean isVerified = forgotPasswordService.verifyToken(forgotPasswordToken, req.getOtp());
 
         if(isVerified){
             userService.updatePassword(forgotPasswordToken.getUser(), req.getPassword());
             ApiResponse res = new ApiResponse();
-            res.setMessage(("Password update Successfully"));
+            res.setMessage("Password update Successfully");
             return new ResponseEntity<>(res, HttpStatus.ACCEPTED);
         }
 
+        throw new Exception("Wrong otp");
+    }
+
+    @PatchMapping("/api/users/verification/verify-otp/{otp}")
+    public ResponseEntity<User> verifyOTP(
+            @RequestHeader("Authorization") String jwt,
+            @PathVariable String otp
+    ) throws Exception{
+
+        User user = userService.findUserByJwt(jwt);
+
+        VerificationCode verificationCode = verificationCodeService.getVerificationCodeByUser(user);
+
+        boolean isVerified = verificationCodeService.verifyOtp(otp, verificationCode);
+
+        if (isVerified){
+            verificationCodeService.deleteVerificationCodeById(verificationCode);
+            User verifiedUser = userService.verifyUser(user);
+            return ResponseEntity.ok(verifiedUser);
+        }
         throw new Exception("Wrong otp");
     }
 
